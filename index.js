@@ -32,9 +32,21 @@ async function createCourse(){
 
 
 async function getCourses(){
+    //or 
+    //and
   const courses = await Course
 //   .find({price: {$gte: 10, $lse: 20}})
-.find({price: {$in: [10, 15, 20]}})
+// .find({price: {$in: [10, 15, 20]}})
+//starts with Sean
+.find({author: /^Sean/})
+
+//ends with Tarzy
+.find({author: /Tarzy$/i})
+
+//contains "Sean"
+//i = case insensitivity
+.find({author: /.*Sean.*/i})
+.or([{name: "Sean"}, {isPublished: "true"}])
   .limit(10)
   .sort({name: 1})
   .select({name: 1, tags: 1});
