@@ -1,5 +1,7 @@
 mongoose = require('mongoose')
 
+
+
 mongoose
   .connect("mongodb://localhost/mongo-exercises", {
     useNewUrlParser: true,
@@ -17,14 +19,17 @@ mongoose
       price: Number
   })
 
-const Course = mongoose.model("Course", courseSchema);
+  const Course = mongoose.model("Course", courseSchema);
 
   async function getSpecificCoursesAndSort() {
-    const courses = await Course.find({ isPublished: true })
+    return await Course.find({ isPublished: true })
       .sort({ name: 1 })
       .select({ name: 1, author: 1 });
-
-    console.log(courses);
   }
 
-  getSpecificCoursesAndSort()
+  async function run(){
+      const courses = await getSpecificCoursesAndSort()
+      console.log(courses)
+  }
+
+  run()
