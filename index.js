@@ -8,11 +8,27 @@ mongoose.connect("mongodb://localhost/playground", {
 .catch((err)=>console.log("could not connect to mongodb", err))
 
 const courseSchema = new mongoose.Schema({
-    name: String,
+    name: {type: String, required: true, minlength: 5, maxlength: 255},
+    category: {
+        // required: true,
+        enum: ['web', 'mobile', 'network']},
     author: String,
-    tags: [String],
+    tags: {type: Array,
+         validate: {
+        validator: function(v){
+            return v && v.length > 0;
+        },
+        message: "tags are required, bro"
+        }
+    },
     date: {type: Date, default: Date.now},
-    isPublished: Boolean
+    isPublished: Boolean,
+    price: {
+        min: 10,
+        max: 200,
+        type: Number,
+        required: function(){return this.isPublished}
+    }
 })
 
 const Course = mongoose.model("Course", courseSchema);
@@ -22,14 +38,21 @@ async function createCourse(){
 
 //implementing pagination
     const course = new Course({
-        name: "angular.js COurse", 
+        // name: "angular.js COurse", 
         author: "Sean", 
-        tags: ['angular', 'frontend'], 
-        isPublished: true
+        // tags: ['angular', 'frontend'], 
+        isPublished: true, 
     })
+
+    try{
+    //    const course = await course.validate()
+        const result = await course.save(); 
+        console.log(result)
+    }
+    catch(ex){
+        console.log("coudn't create", ex.message)
+    }
     
-    const result = await course.save(); 
-    console.log(result)
 }
 
 
@@ -58,6 +81,38 @@ async function getCourses(){
 .skip((pageNumber-1)*pageSize)
 .limit(pageSize)
    console.log(courses)
+}
+
+// async function updateCourse(id){
+
+//     const course = await Course.findByIdAndUpdate(id, {
+//         $set: {
+//             author: "Jason",
+//             isPublished: false
+//         }
+
+//     }, {new: true})
+//     // const course = await Course.findById(id)
+
+//     // if(!course)
+//     // return;
+
+//     // course.isPublished = true
+//     // course.author = "Another Author"
+
+//     // course.set({
+//     //     isPublished: true,
+//     //     author: "Another Author"
+//     // })
+//     // const course = await course.save()
+//     console.log(course)
+// }
+
+async function removeCourse(id){
+
+    const result = await Course.deleteOne({_id: id});
+    console.log(result)
+
 }
 // createCourse()
 
@@ -94,4 +149,6 @@ async function getSpecificCoursesAndSort(){
 }
 
 
-getSpecificCoursesAndSort()
+// getSpecificCoursesAndSort()
+
+createCourse()
