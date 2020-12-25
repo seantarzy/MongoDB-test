@@ -11,12 +11,20 @@ const courseSchema = new mongoose.Schema({
     name: {type: String, required: true, minlength: 5, maxlength: 255},
     category: {
         // required: true,
-        enum: ['web', 'mobile', 'network']},
+        enum: ['web', 'mobile', 'network'],
+    // lowercase: true,
+    // trim: true
+    },
     author: String,
     tags: {type: Array,
          validate: {
-        validator: function(v){
-            return v && v.length > 0;
+             isAsync: true,
+        validator: function(v, callback){
+            setTimeout(()=>{
+
+               const result = v && v.length > 0;
+               callback(result)
+            }, 4000)
         },
         message: "tags are required, bro"
         }
@@ -27,7 +35,9 @@ const courseSchema = new mongoose.Schema({
         min: 10,
         max: 200,
         type: Number,
-        required: function(){return this.isPublished}
+        required: function(){return this.isPublished},
+        get: v=>Math.round(v),
+        set: v=>Math.round(v)
     }
 })
 
@@ -38,10 +48,11 @@ async function createCourse(){
 
 //implementing pagination
     const course = new Course({
-        // name: "angular.js COurse", 
+        name: "angular.js COurse", 
         author: "Sean", 
-        // tags: ['angular', 'frontend'], 
-        isPublished: true, 
+        tags: ['angular', 'frontend'], 
+        isPublished: true,
+        price: 15.8
     })
 
     try{
@@ -50,6 +61,9 @@ async function createCourse(){
         console.log(result)
     }
     catch(ex){
+        for(field in ex.errors){
+            console.log(ex.errors[field].message)
+        }
         console.log("coudn't create", ex.message)
     }
     
